@@ -19,6 +19,7 @@ import java.sql.Statement;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import modelo.ModeloTablaRma;
 import javax.swing.JScrollPane;
@@ -66,7 +67,7 @@ public class VistaMostrarRma extends JPanel {
 
         panelInfo = new JPanel();
         panelInfo.setBackground(new Color(213, 229, 247));
-        info=new JLabel("<html><body>Para ver los detalles de una solicitud,<br>puedes hacer doble click en ella o<br>pulsar en detalles </body></html>");
+        info = new JLabel("<html><body>Para ver los detalles de una solicitud,<br>puedes hacer doble click en ella o<br>pulsar en detalles </body></html>");
         detalles = new BotonBeanProyecto("Detalles");
         //Le annado un actionListener en una clase anonima
         detalles.setActionCommand("detalles");
@@ -75,7 +76,11 @@ public class VistaMostrarRma extends JPanel {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 if (ae.getActionCommand().equals("detalles")) {
-                    MouseAdapterCambiado.crearVentanaDetalles();
+                    try {
+                        MouseAdapterCambiado.crearVentanaDetalles();
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        JOptionPane.showConfirmDialog(null, "No has seleccionado ningun Rma", "Error", JOptionPane.CLOSED_OPTION, JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         });
