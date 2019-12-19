@@ -6,7 +6,11 @@
 package vista;
 
 import adicional.ConexionBD;
+import botonbeanproyecto.BotonBeanProyecto;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
@@ -14,6 +18,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import modelo.ModeloTablaRma;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -25,11 +31,15 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author Manuel Jesus Sanchez Vega
  */
-public class VistaMostrarRma extends JScrollPane {
+public class VistaMostrarRma extends JPanel {
 
     private static JTable tabla;
     private ModeloTablaRma modelo;
     private static JFrame ventanaPrincipal;
+    private JScrollPane panelTabla;
+    private JPanel panelInfo;
+    private JLabel info;
+    private static botonbeanproyecto.BotonBeanProyecto detalles;
 
     public VistaMostrarRma(JFrame ventana) {
 
@@ -40,16 +50,42 @@ public class VistaMostrarRma extends JScrollPane {
 
     private void initComponents() {
 
+        setLayout(new BorderLayout());
+
         //Inicializa la tabla, le añade el modelo y le añade un MouseAdapter, para ver los detalles de las solicitudes
+        panelTabla = new JScrollPane();
         tabla = new JTable();
         modelo = new ModeloTablaRma();
         tabla.setModel(modelo);
         tabla.addMouseListener(new MouseAdapterCambiado());
 
-        setViewportView(tabla);
-        getViewport().setBackground(new Color(213, 229, 247));
-        this.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        this.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panelTabla.setViewportView(tabla);
+        panelTabla.getViewport().setBackground(new Color(213, 229, 247));
+        panelTabla.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        panelTabla.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        panelInfo = new JPanel();
+        panelInfo.setBackground(new Color(213, 229, 247));
+        info=new JLabel("<html><body>Para ver los detalles de una solicitud,<br>puedes hacer doble click en ella o<br>pulsar en detalles </body></html>");
+        detalles = new BotonBeanProyecto("Detalles");
+        //Le annado un actionListener en una clase anonima
+        detalles.setActionCommand("detalles");
+        detalles.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                if (ae.getActionCommand().equals("detalles")) {
+                    MouseAdapterCambiado.crearVentanaDetalles();
+                }
+            }
+        });
+
+        //Annade los paneles al panel prinicpal
+        panelInfo.add(info);
+        panelInfo.add(detalles);
+
+        add(panelTabla, BorderLayout.CENTER);
+        add(panelInfo, BorderLayout.SOUTH);
     }
 
     /**
@@ -86,7 +122,8 @@ public class VistaMostrarRma extends JScrollPane {
     }
 
     /**
-     * Metodo que abre una ventana con los datos de un rma, cuando se hace doble click en algun rma
+     * Metodo que abre una ventana con los datos de un rma, cuando se hace doble
+     * click en algun rma
      */
     private static class MouseAdapterCambiado extends MouseAdapter {
 
@@ -95,23 +132,12 @@ public class VistaMostrarRma extends JScrollPane {
 
         public void mouseClicked(MouseEvent evnt) {
             if (evnt.getClickCount() == 2) {
-                //Abrir ventana con los datos del rma
-                VistaMostrarRmaClick mostrarRma = new VistaMostrarRmaClick();
 
-                //Rellena la tabla con los datos de la base de datos
-                rellenarTablaVistaRmaClick(mostrarRma);
-
-                JDialog dialog3 = new JDialog(ventanaPrincipal, true);
-                dialog3.setTitle("Datos del RMA seleccionado");
-                dialog3.setContentPane(mostrarRma);
-                dialog3.setSize(600, 200);
-                dialog3.setLocationRelativeTo(null);
-                dialog3.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-                dialog3.setVisible(true);
+                crearVentanaDetalles();
             }
         }
 
-        private void rellenarTablaVistaRmaClick(VistaMostrarRmaClick mostrarRma) {
+        private static void rellenarTablaVistaRmaClick(VistaMostrarRmaClick mostrarRma) {
             //Pone los nombres a las columnas
             String[] nombreColumnas = {"Nombre del producto", "Problema"};
             mostrarRma.annadirColumnas(nombreColumnas);
@@ -137,6 +163,22 @@ public class VistaMostrarRma extends JScrollPane {
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+
+        public static void crearVentanaDetalles() {
+            //Abrir ventana con los datos del rma
+            VistaMostrarRmaClick mostrarRma = new VistaMostrarRmaClick();
+
+            //Rellena la tabla con los datos de la base de datos
+            rellenarTablaVistaRmaClick(mostrarRma);
+
+            JDialog dialog3 = new JDialog(ventanaPrincipal, true);
+            dialog3.setTitle("Datos del RMA seleccionado");
+            dialog3.setContentPane(mostrarRma);
+            dialog3.setSize(600, 200);
+            dialog3.setLocationRelativeTo(null);
+            dialog3.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog3.setVisible(true);
         }
     }
 
